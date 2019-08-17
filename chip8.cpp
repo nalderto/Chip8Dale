@@ -281,7 +281,7 @@ void chip8::cycle()
         delay_timer--;
     }
 
-    if (sound_timer == 1)
+    if (sound_timer > 0)
     {
         std::cout << "BEEP!" << std::endl;
         sound_timer--;
