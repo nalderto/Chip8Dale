@@ -245,6 +245,12 @@ void chip8::cycle()
             sound_timer = V[(instruction & 0x0F00) >> 8];
             break;
         case 0x001E: //FX1E: Adds VX to I
+            if (I + V[(instruction & 0x0F00) >> 8] > 255) {
+                V[15] = 1;
+            }
+            else {
+                V[15] = 0;
+            }
             I += V[(instruction & 0x0F00) >> 8];
             break;
         case 0x0029:
