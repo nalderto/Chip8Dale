@@ -1,4 +1,6 @@
 #include <iostream>
+#include <string>
+#include "SFML/Window.hpp"
 #include <stdio.h>
 #include <stdlib.h>  
 
@@ -15,9 +17,6 @@ class chip8
     // Stack
     unsigned short stack[16]; // Stack
     unsigned short sp; //Stack Pointer
-
-    // Graphics
-    unsigned char graphics[64 * 32];
 
     // Timers
     unsigned char delay_timer;
@@ -52,6 +51,10 @@ public:
     void initialize();
     bool loadGame(std::string fileName);
     void cycle();
-    void setKeys();
-    bool drawFlag();
+    unsigned char readKeys();
+
+    // Graphics
+    unsigned char graphics[64 * 32];
+    //Draw Flag
+    bool drawFlag;
 };
