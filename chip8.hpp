@@ -45,6 +45,7 @@ class chip8
             0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
     void clearDisplay();
+    void debuggingInfo();
 
 public:
     void initialize();

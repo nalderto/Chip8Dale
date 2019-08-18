@@ -11,7 +11,7 @@ int main(int argc, char **argv)
 
   // Initialize the Chip8 system and load the game into the memory
   myChip8.initialize();
-  if (!myChip8.loadGame("ROMS/test_opcode.ch8"))
+  if (!myChip8.loadGame("ROMS/Pong.ch8"))
   {
     std::cout << "Error: Could not load game" << std::endl;
     return 1;
@@ -55,7 +55,8 @@ int main(int argc, char **argv)
       renderWindow.display();
       myChip8.drawFlag = false;
     }
-    //myChip8.readKeys();
+    char key = myChip8.readKeys();
+    printf("%d\n", key);
   }
   return 0;
 }

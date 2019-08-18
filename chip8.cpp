@@ -61,7 +61,6 @@ bool chip8::loadGame(std::string fileName)
 void chip8::cycle()
 {
     instruction = memory[pc] << 8 | memory[pc + 1];
-    printf("%X\n", instruction);
     pc += 2;
     switch (instruction & 0xF000)
     {
@@ -102,7 +101,7 @@ void chip8::cycle()
     break;
     case 0x3000: // 3XNN: Skips the next instruction if VX equals NN
     {
-        if (V[instruction & 0x0F00 >> 8] == (instruction & 0x00FF))
+        if (V[(instruction & 0x0F00) >> 8] == (instruction & 0x00FF))
         {
             pc += 2;
         }
@@ -110,7 +109,7 @@ void chip8::cycle()
     break;
     case 0x4000: // 4XNN: Skips the next instruction if VX not equal NN
     {
-        if (V[instruction & 0x0F00 >> 8] != (instruction & 0x00FF))
+        if (V[(instruction & 0x0F00) >> 8] != (instruction & 0x00FF))
         {
             pc += 2;
         }
@@ -218,7 +217,7 @@ void chip8::cycle()
         break;
     case 0x9000: // 9XY0: Skip next instruction if VX != VY
     {
-        if (V[instruction & 0x0F00 >> 8] != V[instruction & 0x00F0 >> 4])
+        if (V[(instruction & 0x0F00) >> 8] != V[(instruction & 0x00F0) >> 4])
         {
             pc += 2;
         }
@@ -348,7 +347,7 @@ void chip8::cycle()
         break;
         case 0x0055: //FX55: Register dump at address I from V0 to VX
         {
-            for (int i = 0; i < (V[(instruction & 0x0F00) >> 8] + 1); i++)
+            for (int i = 0; i < (((instruction & 0x0F00) >> 8) + 1); i++)
             {
                 memory[I + i] = V[i];
             }
@@ -356,7 +355,7 @@ void chip8::cycle()
         break;
         case 0x0065: //FX65: Fills V0 to VX (including VX) with values from memory starting at address I
         {
-            for (int i = 0; i < (V[(instruction & 0x0F00) >> 8] + 1); i++)
+            for (int i = 0; i < (((instruction & 0x0F00) >> 8) + 1); i++)
             {
                 V[i] = memory[I + i];
             }
@@ -483,4 +482,16 @@ void chip8::clearDisplay()
     {
         graphics[i] = 0;
     }
+}
+
+void chip8::debuggingInfo()
+{
+    for (int i = 0; i < 16; i++)
+    {
+        printf("V%X: %X\n", i, V[i]);
+    }
+    printf("I: %X\n", I);
+    printf("PC: %X\n", pc);
+    printf("SP: %X\n", sp);
+    printf("Instruction: %X\n", instruction);
 }
