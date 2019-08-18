@@ -60,6 +60,7 @@ bool chip8::loadGame(std::string fileName)
 
 void chip8::cycle()
 {
+    debuggingInfo();
     instruction = memory[pc] << 8 | memory[pc + 1];
     pc += 2;
     switch (instruction & 0xF000)
@@ -298,14 +299,15 @@ void chip8::cycle()
         {
         case 0x0007: // FX07: Sets VX to the value of the delay timer
         {
-            V[(instruction & 0x0F00) >> 8] == delay_timer;
+            V[(instruction & 0x0F00) >> 8] = delay_timer;
         }
         break;
         case 0x000A: // FX0A: A key press is awaited, and then stored in VX
         {
             unsigned char key;
-            while (key = readKeys() == 255)
+            if (key = readKeys() == 255)
             {
+                pc -= 2;
             }
             V[(instruction & 0x0F00) >> 8] = key;
         }
@@ -390,85 +392,89 @@ void chip8::cycle()
 
 unsigned char chip8::readKeys()
 {
+    for (int i = 0; i < 16; i++) {
+        key[i] = 0;
+    }
+
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1))
     {
         key[0] = 1;
-        return 0;
+        return 0x1;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2))
     {
         key[1] = 1;
-        return 1;
+        return 0x2;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3))
     {
         key[2] = 1;
-        return 2;
+        return 0x3;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num4))
     {
         key[3] = 1;
-        return 3;
+        return 0xC;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
     {
         key[4] = 1;
-        return 4;
+        return 0x4;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
     {
         key[5] = 1;
-        return 5;
+        return 0x5;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
     {
         key[6] = 1;
-        return 6;
+        return 0x6;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
     {
         key[7] = 1;
-        return 7;
+        return 0xD;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
     {
         key[8] = 1;
-        return 8;
+        return 0x7;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
     {
         key[9] = 1;
-        return 9;
+        return 0x8;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
     {
         key[10] = 1;
-        return 10;
+        return 0x9;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::F))
     {
         key[11] = 1;
-        return 11;
+        return 0xE;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
     {
         key[12] = 1;
-        return 12;
+        return 0xA;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::X))
     {
         key[13] = 1;
-        return 13;
+        return 0x0;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::C))
     {
         key[14] = 1;
-        return 14;
+        return 0xB;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::V))
     {
         key[15] = 1;
-        return 15;
+        return 0xF;
     }
     else
     {
@@ -493,5 +499,7 @@ void chip8::debuggingInfo()
     printf("I: %X\n", I);
     printf("PC: %X\n", pc);
     printf("SP: %X\n", sp);
+    printf("DT: %X\n", delay_timer);
+    printf("ST: %X\n", sound_timer);
     printf("Instruction: %X\n", instruction);
 }
