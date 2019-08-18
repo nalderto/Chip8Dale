@@ -11,7 +11,7 @@ int main(int argc, char **argv)
 
   // Initialize the Chip8 system and load the game into the memory
   myChip8.initialize();
-  if (!myChip8.loadGame("test_opcode.ch8"))
+  if (!myChip8.loadGame("ROMS/test_opcode.ch8"))
   {
     std::cout << "Error: Could not load game" << std::endl;
     return 1;
@@ -19,6 +19,7 @@ int main(int argc, char **argv)
 
   while (true)
   {
+
     myChip8.cycle();
     if (myChip8.drawFlag)
     {
@@ -29,6 +30,7 @@ int main(int argc, char **argv)
 
       } //Event handling done
       sf::Image image;
+      sf::Texture texture;
       image.create(64, 32, sf::Color::Black);
       sf::Color blackPixel(0, 0, 0, 255);
       sf::Color whitePixel(255, 255, 255, 255);
@@ -45,8 +47,6 @@ int main(int argc, char **argv)
             image.setPixel(x, y, blackPixel);
         }
       }
-      sf::Texture texture;
-      image.saveToFile("test.png");
       texture.loadFromImage(image);
       sf::Sprite sprite(texture);
       sprite.scale(10, 10);
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
       renderWindow.display();
       myChip8.drawFlag = false;
     }
-    myChip8.readKeys();
+    //myChip8.readKeys();
   }
   return 0;
 }

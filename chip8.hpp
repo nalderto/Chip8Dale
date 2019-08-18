@@ -1,5 +1,4 @@
 #include <iostream>
-#include <string>
 #include "SFML/Window.hpp"
 #include <stdio.h>
 #include <stdlib.h>  

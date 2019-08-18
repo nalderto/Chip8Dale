@@ -62,7 +62,7 @@ void chip8::cycle()
 {
     instruction = memory[pc] << 8 | memory[pc + 1];
     printf("%X\n", instruction);
-
+    pc += 2;
     switch (instruction & 0xF000)
     {
     case 0x0000:
@@ -72,7 +72,6 @@ void chip8::cycle()
         {
             clearDisplay();
             drawFlag = true;
-            pc += 2;
         }
         break;
         case 0x000E: // 0x00EE: Returns from a subroutine
@@ -105,10 +104,6 @@ void chip8::cycle()
     {
         if (V[instruction & 0x0F00 >> 8] == (instruction & 0x00FF))
         {
-            pc += 4;
-        }
-        else
-        {
             pc += 2;
         }
     }
@@ -116,10 +111,6 @@ void chip8::cycle()
     case 0x4000: // 4XNN: Skips the next instruction if VX not equal NN
     {
         if (V[instruction & 0x0F00 >> 8] != (instruction & 0x00FF))
-        {
-            pc += 4;
-        }
-        else
         {
             pc += 2;
         }
@@ -129,10 +120,6 @@ void chip8::cycle()
     {
         if (V[(instruction & 0x0F00) >> 8] == V[instruction & 0x00F0 >> 4])
         {
-            pc += 4;
-        }
-        else
-        {
             pc += 2;
         }
     }
@@ -140,13 +127,11 @@ void chip8::cycle()
     case 0x6000: // 6XNN: Sets VX to NN
     {
         V[(instruction & 0x0F00) >> 8] = (instruction & 0x00FF);
-        pc += 2;
     }
     break;
     case 0x7000: // 7XNN: Adds NN to VX (Carry flag is not changed)
     {
         V[(instruction & 0x0F00) >> 8] += (instruction & 0x00FF);
-        pc += 2;
     }
     break;
     case 0x8000:
@@ -154,83 +139,74 @@ void chip8::cycle()
         {
         case 0x0000: // 8XY0: Sets VX to the value of VY
         {
-            V[(instruction & 0x0F00) >> 8] = V[(instruction & 0x00f0) >> 4];
-            pc += 2;
+            V[(instruction & 0x0F00) >> 8] = V[(instruction & 0x00F0) >> 4];
         }
         break;
         case 0x0001: // 8XY1: Sets VX to VX OR VY.
         {
-            V[(instruction & 0x0F00) >> 8] = V[(instruction & 0x0F00) >> 8] | V[(instruction & 0x00f0) >> 4];
-            pc += 2;
+            V[(instruction & 0x0F00) >> 8] = V[(instruction & 0x0F00) >> 8] | V[(instruction & 0x00F0) >> 4];
         }
         break;
         case 0x0002: //8XY2: Sets VX to VX AND VY
         {
-            V[(instruction & 0x0F00) >> 8] = V[(instruction & 0x0F00) >> 8] & V[(instruction & 0x00f0) >> 4];
-            pc += 2;
+            V[(instruction & 0x0F00) >> 8] = V[(instruction & 0x0F00) >> 8] & V[(instruction & 0x00F0) >> 4];
         }
         break;
         case 0x0003: //8XY3: Sets VX to VX XOR VY
         {
-            V[(instruction & 0x0F00) >> 8] = V[(instruction & 0x0F00) >> 8] ^ V[(instruction & 0x00f0) >> 4];
-            pc += 2;
+            V[(instruction & 0x0F00) >> 8] = V[(instruction & 0x0F00) >> 8] ^ V[(instruction & 0x00F0) >> 4];
         }
         break;
         case 0x0004: //8XY4: Adds VY to VX
         {
-            if (V[(instruction & 0x0F00) >> 8] + V[(instruction & 0x00f0) >> 4] > 255)
+            if (V[(instruction & 0x00F0) >> 4] > (0xFF - V[(instruction & 0x0F00) >> 8]))
             {
-                V[15] = 1;
+                V[0xF] = 1;
             }
             else
             {
-                V[15] = 0;
+                V[0xF] = 0;
             }
 
-            V[(instruction & 0x0F00) >> 8] += V[(instruction & 0x00f0) >> 4];
-            pc += 2;
+            V[(instruction & 0x0F00) >> 8] += V[(instruction & 0x00F0) >> 4];
         }
         break;
         case 0x0005: //8XY5: VY is subtracted from VX
         {
-            if (V[(instruction & 0x0F00) >> 8] < V[(instruction & 0x00F0) >> 4])
+            if (V[(instruction & 0x0F00) >> 8] > (0xFF - V[(instruction & 0x00F0) >> 4]))
             {
-                V[15] = 1;
+                V[0xF] = 1;
             }
             else
             {
-                V[15] = 0;
+                V[0xF] = 0;
             }
             V[(instruction & 0x0F00) >> 8] -= V[(instruction & 0x00F0) >> 4];
-            pc += 2;
         }
         break;
         case 0x0006: //8XY6: Stores the least significant bit of VX in VF and then shifts VX to the right by 1
         {
             V[16] = V[(instruction & 0x0F00) >> 8] & 1;
             V[(instruction & 0x0F00) >> 8] = V[(instruction & 0x0F00) >> 8] >> 1;
-            pc += 2;
         }
         break;
         case 0x0007: //8XY7: Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't
         {
             if (V[(instruction & 0x0F00) >> 8] < V[(instruction & 0x00F0) >> 4])
             {
-                V[15] = 1;
+                V[0xF] = 1;
             }
             else
             {
-                V[15] = 0;
+                V[0xF] = 0;
             }
             V[(instruction & 0x0F00) >> 8] = V[(instruction & 0x00F0) >> 4] - V[(instruction & 0x0F00) >> 8];
-            pc += 2;
         }
         break;
         case 0x000E: //8XYE: Stores the most significant bit of VX in VF and then shifts VX to the left by 1
         {
             V[16] = V[(instruction & 0x0F00) >> 8] & 0x80;
             V[(instruction & 0x0F00) >> 8] = V[(instruction & 0x0F00) >> 8] << 1;
-            pc += 2;
         }
         break;
         default:
@@ -242,11 +218,7 @@ void chip8::cycle()
         break;
     case 0x9000: // 9XY0: Skip next instruction if VX != VY
     {
-        if (V[instruction & 0x0F00 >> 8] != V[instruction & 0x0F00 >> 4])
-        {
-            pc += 4;
-        }
-        else
+        if (V[instruction & 0x0F00 >> 8] != V[instruction & 0x00F0 >> 4])
         {
             pc += 2;
         }
@@ -255,7 +227,6 @@ void chip8::cycle()
     case 0xA000: // ANNN: Sets I to the address NNN
     {
         I = instruction & 0x0FFF;
-        pc += 2;
     }
     break;
     case 0xB000: // BNNN: Jump to the address NNN plus V0
@@ -266,7 +237,6 @@ void chip8::cycle()
     case 0xC000: // CXNN: Sets VX = bitwise AND operation on a random number and NN
     {
         V[instruction & 0x0F00] = (rand() % 256) & (instruction & 0x00FF);
-        pc += 2;
     }
     break;
     case 0xD000: // DXYN: Draws sprite at coordinate VX, VY
@@ -293,7 +263,6 @@ void chip8::cycle()
             }
         }
         drawFlag = true;
-        pc += 2;
     }
     break;
     case 0xE000:
@@ -304,10 +273,6 @@ void chip8::cycle()
         {
             if (key[V[(instruction & 0x0F00) >> 8]] != 0)
             {
-                pc += 4;
-            }
-            else
-            {
                 pc += 2;
             }
         }
@@ -315,10 +280,6 @@ void chip8::cycle()
         case 0x00A1: // EXA1: Skips the next instruction if the key stored in VX isn't pressed
         {
             if (key[V[(instruction & 0x0F00) >> 8]] == 0)
-            {
-                pc += 4;
-            }
-            else
             {
                 pc += 2;
             }
@@ -339,7 +300,6 @@ void chip8::cycle()
         case 0x0007: // FX07: Sets VX to the value of the delay timer
         {
             V[(instruction & 0x0F00) >> 8] == delay_timer;
-            pc += 2;
         }
         break;
         case 0x000A: // FX0A: A key press is awaited, and then stored in VX
@@ -349,48 +309,41 @@ void chip8::cycle()
             {
             }
             V[(instruction & 0x0F00) >> 8] = key;
-            pc += 2;
         }
         break;
         case 0x0015: // FX15: Sets the delay timer to VX
         {
             delay_timer = V[(instruction & 0x0F00) >> 8];
-            pc += 2;
         }
         break;
         case 0x0018: // FX18: Sets the sound timer to VX
         {
             sound_timer = V[(instruction & 0x0F00) >> 8];
-            pc += 2;
         }
         break;
         case 0x001E: //FX1E: Adds VX to I
         {
             if (I + V[(instruction & 0x0F00) >> 8] > 255)
             {
-                V[15] = 1;
+                V[0xF] = 1;
             }
             else
             {
-                V[15] = 0;
+                V[0xF] = 0;
             }
             I += V[(instruction & 0x0F00) >> 8];
-            pc += 2;
         }
         break;
         case 0x0029: //FX29: Sets I to the location of the sprite for the character in VX
         {
             I = V[(instruction & 0x0F00) >> 8] * 4;
-            pc += 2;
         }
         break;
         case 0x0033: //FX33: Stores the binary-coded decimal representation of VX
         {
-            std::string numString = std::to_string(V[(instruction & 0x0F00) >> 8]);
-            memory[I] = numString.at(0) - 48;
-            memory[I + 1] = numString.at(1) - 48;
-            memory[I + 2] = numString.at(2) - 48;
-            pc += 2;
+            memory[I] = V[(instruction & 0x0F00) >> 8] / 100;
+            memory[I + 1] = (V[(instruction & 0x0F00) >> 8] / 10) % 10;
+            memory[I + 2] = (V[(instruction & 0x0F00) >> 8] % 100) % 10;
         }
         break;
         case 0x0055: //FX55: Register dump at address I from V0 to VX
@@ -398,7 +351,6 @@ void chip8::cycle()
             for (int i = 0; i < (V[(instruction & 0x0F00) >> 8] + 1); i++)
             {
                 memory[I + i] = V[i];
-                pc += 2;
             }
         }
         break;
@@ -407,7 +359,6 @@ void chip8::cycle()
             for (int i = 0; i < (V[(instruction & 0x0F00) >> 8] + 1); i++)
             {
                 V[i] = memory[I + i];
-                pc += 2;
             }
         }
         break;
