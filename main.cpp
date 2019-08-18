@@ -6,7 +6,7 @@ chip8 myChip8;
 int main(int argc, char **argv)
 {
   //Initialize SFML Graphics
-  sf::RenderWindow renderWindow(sf::VideoMode(640, 320), "Chip8DalePlusPlus");
+  sf::RenderWindow renderWindow(sf::VideoMode(640, 320), "Chip8Dale");
   sf::Event event;
 
   // Initialize the Chip8 system and load the game into the memory
