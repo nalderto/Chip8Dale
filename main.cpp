@@ -1,26 +1,49 @@
 #include "SFML/Graphics.hpp"
 #include "chip8.hpp"
+#include <sys/stat.h>
 
 chip8 myChip8;
 
 int main(int argc, char **argv)
 {
-  //Initialize SFML Graphics
-  sf::RenderWindow renderWindow(sf::VideoMode(640, 320), "Chip8Dale");
-  sf::Event event;
-
-  // Initialize the Chip8 system and load the game into the memory
-  myChip8.initialize();
-  if (!myChip8.loadGame("ROMS/Space_Invaders.ch8"))
-  {
-    std::cout << "Error: Could not load game" << std::endl;
+  // Check that a game have been selected
+  if (argc == 2) {
+    struct stat buffer;
+    // Initialize the Chip8 system and load the game into the memory
+    myChip8.initialize();
+    if (!myChip8.loadGame(argv[1])) {
+        std::cout << "Error: Could not load program" << std::endl;
+        return 1;
+    }
+  }
+  else {
+    std::cout << "Error: Please specify program" << std::endl;
     return 1;
   }
+
+  // Initialize SFML Graphics
+  sf::RenderWindow renderWindow(sf::VideoMode(640, 320), "Chip8Dale");
+  sf::Event event;
 
   while (true)
   {
 
-    myChip8.cycle();
+    for (int i = 0; i <= 9; i++) {
+      myChip8.cycle();
+      myChip8.readKeys();
+    }
+
+    if (myChip8.delay_timer > 0)
+    {
+        myChip8.delay_timer--;
+    }
+
+    if (myChip8.sound_timer > 0)
+    {
+        std::cout << "BEEP!" << std::endl;
+        myChip8.sound_timer--;
+    }
+
     if (myChip8.drawFlag)
     {
       while (renderWindow.pollEvent(event))
@@ -55,7 +78,7 @@ int main(int argc, char **argv)
       renderWindow.display();
       myChip8.drawFlag = false;
     }
-    myChip8.readKeys();
+
   }
   return 0;
 }

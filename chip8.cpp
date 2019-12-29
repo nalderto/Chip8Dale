@@ -45,6 +45,11 @@ bool chip8::loadGame(std::string fileName)
     {
         fp = fopen(fileName.c_str(), "rb");
         int i = 0;
+
+        if (fp == NULL) {
+            return false;
+        }
+
         while (!feof(fp))
         {
             fread(&memory[512 + i], sizeof(unsigned char), 1, fp);
@@ -271,7 +276,7 @@ void chip8::cycle()
         {
         case 0x009E: // EX9E: Skips the next instruction if the key stored in VX is pressed
         {
-            if (key[V[(instruction & 0x0F00) >> 8]] != 0)
+            if (keys[V[(instruction & 0x0F00) >> 8]] != 0)
             {
                 pc += 2;
             }
@@ -279,7 +284,7 @@ void chip8::cycle()
         break;
         case 0x00A1: // EXA1: Skips the next instruction if the key stored in VX isn't pressed
         {
-            if (key[V[(instruction & 0x0F00) >> 8]] == 0)
+            if (keys[V[(instruction & 0x0F00) >> 8]] == 0)
             {
                 pc += 2;
             }
@@ -378,102 +383,92 @@ void chip8::cycle()
     break;
     }
 
-    if (delay_timer > 0)
-    {
-        delay_timer--;
-    }
-
-    if (sound_timer > 0)
-    {
-        std::cout << "BEEP!" << std::endl;
-        sound_timer--;
-    }
 }
 
 unsigned char chip8::readKeys()
 {
     for (int i = 0; i < 16; i++) {
-        key[i] = 0;
+        keys[i] = 0;
     }
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1))
     {
-        key[0] = 1;
+        keys[0] = 1;
         return 0x1;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2))
     {
-        key[1] = 1;
+        keys[1] = 1;
         return 0x2;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3))
     {
-        key[2] = 1;
+        keys[2] = 1;
         return 0x3;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num4))
     {
-        key[3] = 1;
+        keys[3] = 1;
         return 0xC;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
     {
-        key[4] = 1;
+        keys[4] = 1;
         return 0x4;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
     {
-        key[5] = 1;
+        keys[5] = 1;
         return 0x5;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
     {
-        key[6] = 1;
+        keys[6] = 1;
         return 0x6;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
     {
-        key[7] = 1;
+        keys[7] = 1;
         return 0xD;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
     {
-        key[8] = 1;
+        keys[8] = 1;
         return 0x7;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
     {
-        key[9] = 1;
+        keys[9] = 1;
         return 0x8;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
     {
-        key[10] = 1;
+        keys[10] = 1;
         return 0x9;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::F))
     {
-        key[11] = 1;
+        keys[11] = 1;
         return 0xE;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
     {
-        key[12] = 1;
+        keys[12] = 1;
         return 0xA;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::X))
     {
-        key[13] = 1;
+        keys[13] = 1;
         return 0x0;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::C))
     {
-        key[14] = 1;
+        keys[14] = 1;
         return 0xB;
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::V))
     {
-        key[15] = 1;
+        keys[15] = 1;
         return 0xF;
     }
     else

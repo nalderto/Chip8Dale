@@ -17,12 +17,10 @@ class chip8
     unsigned short stack[16]; // Stack
     unsigned short sp; //Stack Pointer
 
-    // Timers
-    unsigned char delay_timer;
-    unsigned char sound_timer;
+
 
     // Keypad
-    unsigned char key[16];
+    unsigned char keys[16];
 
     // Fontset
     unsigned char chip8_fontset[80] =
@@ -57,4 +55,8 @@ public:
     unsigned char graphics[64 * 32];
     //Draw Flag
     bool drawFlag;
+
+    // Timers
+    unsigned char delay_timer;
+    unsigned char sound_timer;
 };
