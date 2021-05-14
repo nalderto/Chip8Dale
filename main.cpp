@@ -1,17 +1,24 @@
-#include "SFML/Graphics.hpp"
-#include "chip8.hpp"
-#include <sys/stat.h>
+#include "Chip8.hpp"
+#include <chrono>
+#include <thread>
 
-chip8 myChip8;
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
+
+#define CLOCKSPEED 600
+
+Chip8* myChip8;
 
 int main(int argc, char **argv)
 {
   // Check that a game have been selected
   if (argc == 2) {
-    struct stat buffer;
     // Initialize the Chip8 system and load the game into the memory
-    myChip8.initialize();
-    if (!myChip8.loadGame(argv[1])) {
+    myChip8 = new Chip8();
+    if (!myChip8->loadGame(argv[1])) {
         std::cout << "Error: Could not load program" << std::endl;
         return 1;
     }
@@ -21,63 +28,38 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  // Initialize SFML Graphics
-  sf::RenderWindow renderWindow(sf::VideoMode(640, 320), "Chip8Dale");
-  sf::Event event;
-
   while (true)
   {
+    // Program Start Time
+    std::chrono::time_point<std::chrono::steady_clock> prev_time = std::chrono::steady_clock::now();
+    double clockCyclesPerSecond = CLOCKSPEED / 60.0;
 
-    for (int i = 0; i <= 9; i++) {
-      myChip8.cycle();
-      myChip8.readKeys();
+    for (int i = 0; i < clockCyclesPerSecond; i++) {
+      myChip8->cycle();
     }
 
-    if (myChip8.delay_timer > 0)
+    if (myChip8->delay_timer > 0)
     {
-        myChip8.delay_timer--;
+        myChip8->delay_timer--;
     }
 
-    if (myChip8.sound_timer > 0)
+    if (myChip8->sound_timer > 0)
     {
         std::cout << "BEEP!" << std::endl;
-        myChip8.sound_timer--;
+        myChip8->sound_timer--;
     }
 
-    if (myChip8.drawFlag)
+    if (myChip8->drawFlag)
     {
-      while (renderWindow.pollEvent(event))
-      {
-        if (event.type == sf::Event::Closed)
-          renderWindow.close();
-
-      } //Event handling done
-      sf::Image image;
-      sf::Texture texture;
-      image.create(64, 32, sf::Color::Black);
-      sf::Color blackPixel(0, 0, 0, 255);
-      sf::Color whitePixel(255, 255, 255, 255);
-
-      //Loop through each vertical row of the image
-      for (int y = 0; y < 32; y++)
-      {
-        //then horizontal, setting pixels to black or white in blocks of 8
-        for (int x = 0; x < 64; x++)
-        {
-          if (myChip8.graphics[(64 * y) + x])
-            image.setPixel(x, y, whitePixel);
-          else
-            image.setPixel(x, y, blackPixel);
-        }
-      }
-      texture.loadFromImage(image);
-      sf::Sprite sprite(texture);
-      sprite.scale(10, 10);
-      renderWindow.clear(sf::Color::Black);
-      renderWindow.draw(sprite);
-      renderWindow.display();
-      myChip8.drawFlag = false;
+      myChip8->draw();
     }
+    std::chrono::time_point<std::chrono::steady_clock> now_time = std::chrono::steady_clock::now();
+
+    std::chrono::duration<double> diff = now_time - prev_time;
+
+    std::chrono::duration<double> wait = std::chrono::microseconds(16700) - diff;
+
+    std::this_thread::sleep_for(wait);
 
   }
   return 0;

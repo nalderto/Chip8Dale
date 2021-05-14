@@ -1,6 +1,6 @@
-#include "chip8.hpp"
+#include "Chip8.hpp"
 
-void chip8::initialize()
+Chip8::Chip8() : renderWindow(sf::VideoMode(640, 320), "Chip8Dale")
 {
     pc = 0x200;      // Program Counter Starts at 0x200
     instruction = 0; // Reset Current Instruction
@@ -36,9 +36,12 @@ void chip8::initialize()
     {
         memory[i] = chip8_fontset[i];
     }
+
+    // Initialize SFML Graphics
+    sf::Event event;
 };
 
-bool chip8::loadGame(std::string fileName)
+bool Chip8::loadGame(std::string fileName)
 {
     FILE *fp;
     try
@@ -46,7 +49,8 @@ bool chip8::loadGame(std::string fileName)
         fp = fopen(fileName.c_str(), "rb");
         int i = 0;
 
-        if (fp == NULL) {
+        if (fp == NULL)
+        {
             return false;
         }
 
@@ -63,7 +67,7 @@ bool chip8::loadGame(std::string fileName)
     }
 };
 
-void chip8::cycle()
+void Chip8::cycle()
 {
     debuggingInfo();
     instruction = memory[pc] << 8 | memory[pc + 1];
@@ -382,12 +386,13 @@ void chip8::cycle()
     }
     break;
     }
-
+    readKeys();
 }
 
-unsigned char chip8::readKeys()
+unsigned char Chip8::readKeys()
 {
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < 16; i++)
+    {
         keys[i] = 0;
     }
 
@@ -477,7 +482,42 @@ unsigned char chip8::readKeys()
     }
 }
 
-void chip8::clearDisplay()
+void Chip8::draw()
+{
+    while (renderWindow.pollEvent(event))
+    {
+        if (event.type == sf::Event::Closed)
+            renderWindow.close();
+
+    } //Event handling done
+    sf::Image image;
+    sf::Texture texture;
+    image.create(64, 32, sf::Color::Black);
+    sf::Color blackPixel(0, 0, 0, 255);
+    sf::Color whitePixel(255, 255, 255, 255);
+
+    //Loop through each vertical row of the image
+    for (int y = 0; y < 32; y++)
+    {
+        //then horizontal, setting pixels to black or white in blocks of 8
+        for (int x = 0; x < 64; x++)
+        {
+            if (graphics[(64 * y) + x])
+                image.setPixel(x, y, whitePixel);
+            else
+                image.setPixel(x, y, blackPixel);
+        }
+    }
+    texture.loadFromImage(image);
+    sf::Sprite sprite(texture);
+    sprite.scale(10, 10);
+    renderWindow.clear(sf::Color::Black);
+    renderWindow.draw(sprite);
+    renderWindow.display();
+    drawFlag = false;
+}
+
+void Chip8::clearDisplay()
 {
     for (int i = 0; i < (64 * 32); i++)
     {
@@ -485,7 +525,7 @@ void chip8::clearDisplay()
     }
 }
 
-void chip8::debuggingInfo()
+void Chip8::debuggingInfo()
 {
     for (int i = 0; i < 16; i++)
     {

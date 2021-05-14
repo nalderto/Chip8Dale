@@ -1,9 +1,10 @@
 #include <iostream>
 #include "SFML/Window.hpp"
+#include "SFML/Graphics.hpp"
 #include <stdio.h>
 #include <stdlib.h>  
 
-class chip8
+class Chip8
 {
     unsigned short instruction; // Current Instruction
     unsigned char memory[4096]; // Memory
@@ -16,8 +17,6 @@ class chip8
     // Stack
     unsigned short stack[16]; // Stack
     unsigned short sp; //Stack Pointer
-
-
 
     // Keypad
     unsigned char keys[16];
@@ -46,15 +45,19 @@ class chip8
     void debuggingInfo();
 
 public:
-    void initialize();
+    Chip8();
     bool loadGame(std::string fileName);
     void cycle();
+    void draw();
     unsigned char readKeys();
 
     // Graphics
     unsigned char graphics[64 * 32];
-    //Draw Flag
+    // Draw Flag
     bool drawFlag;
+    // SFML Window
+    sf::RenderWindow renderWindow;
+    sf::Event event;
 
     // Timers
     unsigned char delay_timer;
